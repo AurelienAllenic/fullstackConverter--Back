@@ -5,7 +5,7 @@ const sharp = require("sharp");
 const fs = require("fs");
 const path = require("path");
 const archiver = require("archiver");
-const axios = require("axios"); // ✅ Ajout pour télécharger des images depuis une URL
+const axios = require("axios");
 
 const app = express();
 const cors = require("cors");
@@ -15,9 +15,8 @@ app.use("/converted-images", express.static(OUTPUT_FOLDER));
 const PORT = 5000;
 const UPLOADS_FOLDER = "uploads";
 
-app.use(express.json()); // ✅ Gérer JSON dans les requêtes
+app.use(express.json());
 
-// Middleware pour gérer l'upload des fichiers
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     if (!fs.existsSync(UPLOADS_FOLDER)) fs.mkdirSync(UPLOADS_FOLDER);
@@ -29,7 +28,6 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage: storage });
 
-// Route pour convertir une image depuis une URL
 app.post("/convert-url", async (req, res) => {
   const { imageUrl, format } = req.body;
 
@@ -48,9 +46,9 @@ app.post("/convert-url", async (req, res) => {
     });
 
     const imageBuffer = Buffer.from(response.data);
-    const fileName = path.basename(imageUrl).split("?")[0]; // Supprime les paramètres d'URL
-    const fileExt = path.extname(fileName) || ".jpg"; // Définit une extension par défaut si absente
-    const cleanFileName = path.parse(fileName).name; // Supprime l'extension
+    const fileName = path.basename(imageUrl).split("?")[0];
+    const fileExt = path.extname(fileName) || ".jpg";
+    const cleanFileName = path.parse(fileName).name;
 
     const outputPath = path.join(OUTPUT_FOLDER, `${cleanFileName}.${format}`);
 
@@ -62,7 +60,6 @@ app.post("/convert-url", async (req, res) => {
   }
 });
 
-// ✅ Route pour télécharger tous les fichiers convertis sous forme de ZIP
 app.get("/download-zip", async (req, res) => {
   const zipName = `converted_images.zip`;
   const zipPath = path.join(OUTPUT_FOLDER, zipName);
@@ -79,7 +76,6 @@ app.get("/download-zip", async (req, res) => {
   archive.finalize();
 });
 
-// Lancer le serveur
 app.listen(PORT, () => {
   console.log(`✅ Serveur démarré sur http://localhost:${PORT}`);
 });
